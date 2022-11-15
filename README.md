@@ -51,4 +51,20 @@ Koduruuteril on üks liides, mis läheb internetiteenuse pakkuja juurde, ning te
 
 Võrguprotokollid koosnevad mitmest kihist. Nendel kihtidel on omad ülesanded ning ülemiste kihtide töö sõltub sellest, kas alumised kihid on oma ülesanded edukalt ära teinud. Käsuga ```tcpdump``` saab näha igat võrguliiklust hosti ja võrgu vahel (mitte ainult TCP). Sama käsuga saab näha ka neid pakke, mida arvuti kasutab veebiserveriga suhtlemiseks.
 
-```printf 'HEAD / HTTP/1.1\r\nHost: example.net\r\n\r\n' | nc example.net 80``` näitab pakke, mis liiguvad arvuti ja veebilehe vahel. Iga kirje lõpus on length, mis näitab, kui palju andmeid saadeti pakkides.
+```printf 'HEAD / HTTP/1.1\r\nHost: example.net\r\n\r\n' | nc example.net 80``` näitab pakke, mis liiguvad arvuti ja veebilehe vahel. Iga kirje lõpus on length, mis näitab, kui palju andmeid saadeti pakkides. Enamus pakkides andmeid ei ole (length on 0). See näitab, et enne, kui klient ja server saavad andmeid vahetada, peavad nad ühenduse looma. Pärast andmete vahetamist peavad nad ühenduse katkestama.
+
+Kui klient saadab serverile sõnumi või vastupidi, siis sõnumi kohale jõudmiseks kulub alati mingi aeg ehk sõnum ei jõua samal hetkel kohale kui välja saadeti. Kui klient saadab kaks sõnumit, siis server hakkab esimesele sõnumile vastama kohe pärast selle nägemist ning server ei saa esimest vastust muuta teise päringu järgi, kuna ei ole seda näinud veel. Kui klient on esimese vastuse saanud, siis saab saata serverisse järgmise päringu. Selline lähenemine kehtib ainult HTTP kihi kohta - see ei näita individuaalsete IP-pakkide saatmist.
+
+Kui TCP ühendus avaneb, peavad klient ja server jõudma kokkuleppele, et see ühendus eksisteerib. Enne, kui midagi juhtub, teab klient serveri IP-aadressi ja pordinumbrit, aga server ei tea kliendist midagi. Seega peab klient saatma serverile sõnumi, mis sisaldab muuhulgas kliendi IP-aadressi ja pordinumbrit ning sõnumit, et klient soovib serveri ning selle IP ja pordiga ühenduda. TCP teeb sellest isegi enam - see jälgib ka andmeid, mida igasse lõpp-punkti saadetakse, kas andmed sinna kohale jõuavad ning tagab, et rakendus näeb andmeid õiges järjekorras (isegi, kui võrk saadab käsud teises järjestuses). TCP saab jälgida järjestust selliselt, et paneb järjekorranumbri igale pakile juurde. Lõpp-punkt saadab kinnituse, kui on kätte saanud kindla järjekorranumbri ja kui pakk läheb kaduma, siis algsaatja märkab, et pole kinnitust ning saadab paki uuesti. Kõigi selliste pakkide length on 0.
+
+Järjekorranumbrid on vajalikud, et jälgida, kas kõik pakid on kohale toimetatud ja kätte saadud. Võrk saab pakke kohale toimetada "vales" järjekorras. Iga lõpp-punkt operatsioonisüsteemis (mitte brauseris, veebiserveris jne) hoiab mälus nii palju ruumi, et see mahutaks saabuvaid andmeid. Mälu kasutab järjekorranumbreid positsioonina.
+
+Igal tcpdump paki kirjel on osa *Flags*, millele järgneb kandilistes sulgudes tähed või punktid. *Flag* on tõeväärtus (õige või vale), mis hoiustatakse mälus ühe bitina. Kui *Flag* on 1, siis see on *set*, kui 0, siis *cleared* või *unset*. TCP-l on 6 põhilist *flag*-i: S, F, P, R, ., U.
+
+Esimesel pakil, mis saadetakse TCP sessiooni algatama, on alati SYN lipuke (```Flags [S]```). Sellel pakil on ka uus, suvaline järjekorranumber. Kui server nõustub ühendusega, siis see saadab paki tagasi, millel on SYN ja ACK lipukesed (```Flags [S.]```). Lõpuks tunnistab klient SYN ja ACK paki saamist saates ise ACK paki serverile.
+
+Kui iga lõpp-punkt on lõpetanud andmete saatmise ühendusse, siis see saab saata FIN paki, et viidata lõpetamisele. Teine lõpp-punkt saadab ACK, et viidata FIN kättesaamisele.
+
+TCP ei saada kogu infokogumit korraga ruuterisse, sest sellisel juhul ei mahuks sinna tol hetkel midagi muud ehk keegi teine ei saaks selles võrgus midagi saata. TCP hakkab andmeid saata aeglaselt ja tõstab kiirust vaid siis, kui teine pool saab sammu pidada kinnituste tagasi saatmisega. Kui pakid on saadetud, siis TCP aeglustab ja seejärel suurendab taas kiirust. Kui ruuter laseks andmetel kuhjuda, siis ühendus lõpuks lõppeks. 
+
+Kui serverilt vastuse saamine võtab liiga kaua aega, siis TCP loobub ühendamisest ja annab errori rakendusele. TCP-l on mitu sisse ehitatud taimerit sellise olukorra jaoks.
