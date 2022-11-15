@@ -45,3 +45,10 @@ Teine võimalus märkida võrgu suurust on alamvõrgumask (*subnet mask*), mida 
 Aadressid kuuluvad liidestele, mitte hostidele. Host võib omada mitut võrguliidest ja iga liides võib omaga 0 või mitu aadressi. Arvutil saab olla näiteks etherneti, wifi ja *loopback* liides. *Loopback* liidesel on peaaegu alati IP-aadressiks 127.0.0.1 ja nimeks *localhost* - see laseb programmidel kasutada protokollivirnasid, et suhelda sama hosti teiste programmidega. Linuxis saab liidesed leida käsuga ```ip addr show```.
 
 Koduruuteril on üks liides, mis läheb internetiteenuse pakkuja juurde, ning teine või mitu liidest, mis on kohalikud, näiteks etherneti või wifi omad. Kohalikus võrgus (LAN) on minu arvuti ja seadmed. Laivõrk (WAN) on liides, mis ühendub ülejäänud internetiga. Ruuter on seade, mis ühendab kaht erinevat IP-võrku. See käitub väravana. Kui ühe võrgu hostid tahavad saata liiklust teise võrgu hostile, siis see liiklus toimub läbi ruuteri. Kui enamus hostidel on üks liides IPv4 aadressiga, siis ruuteril on kaks või rohkem. Kohaliku võrgu host teab vaikimisi ruuterit, milleks on ruuter, mis on ülejäänud internetiga ühendatud.
+
+
+## Protocol Layers
+
+Võrguprotokollid koosnevad mitmest kihist. Nendel kihtidel on omad ülesanded ning ülemiste kihtide töö sõltub sellest, kas alumised kihid on oma ülesanded edukalt ära teinud. Käsuga ```tcpdump``` saab näha igat võrguliiklust hosti ja võrgu vahel (mitte ainult TCP). Sama käsuga saab näha ka neid pakke, mida arvuti kasutab veebiserveriga suhtlemiseks.
+
+```printf 'HEAD / HTTP/1.1\r\nHost: example.net\r\n\r\n' | nc example.net 80``` näitab pakke, mis liiguvad arvuti ja veebilehe vahel. Iga kirje lõpus on length, mis näitab, kui palju andmeid saadeti pakkides.
