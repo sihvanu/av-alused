@@ -68,3 +68,18 @@ Kui iga lõpp-punkt on lõpetanud andmete saatmise ühendusse, siis see saab saa
 TCP ei saada kogu infokogumit korraga ruuterisse, sest sellisel juhul ei mahuks sinna tol hetkel midagi muud ehk keegi teine ei saaks selles võrgus midagi saata. TCP hakkab andmeid saata aeglaselt ja tõstab kiirust vaid siis, kui teine pool saab sammu pidada kinnituste tagasi saatmisega. Kui pakid on saadetud, siis TCP aeglustab ja seejärel suurendab taas kiirust. Kui ruuter laseks andmetel kuhjuda, siis ühendus lõpuks lõppeks. 
 
 Kui serverilt vastuse saamine võtab liiga kaua aega, siis TCP loobub ühendamisest ja annab errori rakendusele. TCP-l on mitu sisse ehitatud taimerit sellise olukorra jaoks.
+
+
+## Big Networks
+
+Internetti "hoiavad koos" ruuterid, mis edastavad pakke allikast sihtkohta. Iga edastus, mis läheb ühest masinast teise, on *hop*. *traceroute* tööriista kasutades saab näha enda võrgust teistesse serveritesse minevaid *hop*'e: ```traceroute google.com```.
+
+Arvuti ei oska öelda, kui kaua võtab pakil aega, et jõuda õhest kohast teise otsa. Aga arvui oskab öelda, kui palju aega on möödunud hetkest, kui pakk teele saadeti ja vastus saadi.
+
+Igal pakil on "aeg elada" (*TTL*), mis väheneb ühe võrra iga kord, kui pakk jõuab mõnda rutterisse ja/või sihtkohta. Kui ruuterid on valesti seadistatud ja pakid liiguvad lõputus ringis, siis TTL jõuab lüpuks nulli ja aegub - see aitab vältida suurtel networkidel kokku jooksmast liiga suure liikluse tõttu. Kui pakk aegub, siis ruuter, mis selle viimasena kätte sai, saadab errori sõnumi paki originaalsaatjale, kus on kirjas rutueri aadress, kus pakk aegus.
+
+Latentsusaeg (*latency*) on paki kulgemise aeg lähtekohast lõplikku sihtkohta. Latentsusaega mõjutab kaugus ja *hop*'de arv. Interneti signaalid iiguvad valguskiirusega, aga ruuteritel võtab aega, et neid signaale ümber lülitada.
+
+Ülekandemaht (*bandwidth*) on edastuskanali läbilaskevõime ehk suurim võimalik või vajalik andmeedastuskiirus kanalis, mõõtühik bitt sekundis (bit/s) või bait sekundis (B/s).
+
+Tulemüür on vahend, mis filtreerib sissetulevat ja väljaminevat liiklust võrgus. Tuemüür kuulub suuremasse mõistesse nagu *middlebox*, mis on vahend võrgu inspekteerimiseks, muutmiseks ja filtreerimiseks.
